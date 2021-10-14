@@ -1,0 +1,62 @@
+version: '3'
+# define all services
+services:
+  # our service is called PHP Laravel ;-)
+  php-laravel:
+    # we want to use the image which is build from our Dockerfile
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: 0175648424/laravel7php7.4:v1.3
+    # apache is running on port 80 but we want to expose this to port 4000 on our local machine
+    container_name: webapp-ultd
+    restart: always
+    ports:
+      - "1086:80"
+    privileged: true
+    
+    links:
+      - mysql
+      - redis
+    # we mount the working dir into the container, handy for development
+    volumes:
+      - ./src/ultd:/var/www/html
+      #- ./laravel-que.conf:/etc/supervisor/conf.d/laravel-que.conf
+      #- ./short-schedule.conf:/etc/supervisor/conf.d/short-schedule.conf
+      - ./000-default.conf:/etc/apache2/sites-enabled/000-default.conf
+      #- ./php.ini:/etc/php/7.4/apache2/php.ini
+    #network_mode: host
+
+      
+  mysql:
+    image: mysql:5.7
+    container_name: mysql-ultd
+    restart: always
+    environment:
+      - "MYSQL_ROOT_PASSWORD=hadi123"
+      - "MYSQL_DATABASE=ultd"
+      - "MYSQL_PASSWORD=hadi123"
+    ports:
+      - "3309:3306"
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    #network_mode: host
+   
+
+  redis:
+    image: redis:alpine
+    container_name: redis-ultd 
+    restart: always    
+      #environment:
+      #  REDIS_PASSWORD=redis
+    command: redis-server --appendonly yes --requirepass "redis"
+    volumes:
+      - ./redis:/data
+    ports:
+      - "6380:6379"   
+    
+      
+  
+volumes:
+  dbdata:
+
