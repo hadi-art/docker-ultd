@@ -1,0 +1,57 @@
+version: '3'
+# define all services
+services:
+  # our service is called PHP Laravel ;-)
+  php-laravel:
+    # we want to use the image which is build from our Dockerfile
+    build: 
+      context: .
+      dockerfile: k8s-Dockerfile
+    image: 0175648424/k8s-ultd-web
+    # apache is running on port 80 but we want to expose this to port 4000 on our local machine
+    container_name: webapp-ultd
+    environment:
+    - "APP_NAME=ULTD"
+    restart: always
+    ports:
+      - "1086:80"
+    #volumes:
+    #  - ./storage:/var/www/html/storage
+    privileged: true
+    
+    links:
+      - mysql
+      - redis
+      
+  mysql:
+    image: mysql:5.7
+    container_name: mysql-ultd
+    restart: always
+    environment:
+      - "MYSQL_ROOT_PASSWORD=hadi123"
+      - "MYSQL_DATABASE=ultd"
+      - "MYSQL_PASSWORD=hadi123"
+    ports:
+      - "3309:3306"
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    #network_mode: host
+   
+
+  redis:
+    image: redis:alpine
+    container_name: redis-ultd 
+    restart: always    
+      #environment:
+      #  REDIS_PASSWORD=redis
+    command: redis-server --appendonly yes --requirepass "redis"
+    volumes:
+      - ./redis:/data
+    ports:
+      - "6380:6379"   
+    
+      
+  
+volumes:
+  dbdata:
+

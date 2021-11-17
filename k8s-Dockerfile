@@ -1,0 +1,10 @@
+FROM 0175648424/laravel7php7.4:v1.3
+
+MAINTAINER rpi.iot.2020@gmail.com
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+COPY src/ultd/ /var/www/html
+COPY 000-default.conf /etc/apache2/sites-enabled/000-default.conf
+
+RUN chmod -R 777 /var/www/html/storage
